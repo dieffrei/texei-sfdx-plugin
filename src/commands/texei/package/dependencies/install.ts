@@ -29,7 +29,8 @@ export default class Install extends SfdxCommand {
     branch: { char: 'b', required: false, description: 'the package version’s branch' },
     namespaces: { char: 'n', required: false, description: 'filter package installation by namespace' },
     wait: { char: 'w', type: 'number', required: false, description: 'number of minutes to wait for installation status (also used for publishwait). Default is 10' },
-    noprompt: { char: 'r', required: false, type: 'boolean', description: 'allow Remote Site Settings and Content Security Policy websites to send or receive data without confirmation' }
+    noprompt: { char: 'r', required: false, type: 'boolean', description: 'allow Remote Site Settings and Content Security Policy websites to send or receive data without confirmation' },
+    travisretry: { char: 't', required: false, type: 'boolean', description: 'if the command fail it going to retry 3 times again'}
   };
 
   // Comment this out if your command does not require an org username
@@ -137,7 +138,12 @@ export default class Install extends SfdxCommand {
 
         // Split arguments to use spawn
         const args = [];
-        args.push('force:package:install');
+
+        if (this.flags.travisretry) {
+          args.push('travis_retry force:package:install');
+        } else {
+          args.push('force:package:install');
+        }
 
         // USERNAME
         args.push('--targetusername');

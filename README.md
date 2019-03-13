@@ -43,6 +43,8 @@ OPTIONS
   -r, --noprompt                                   allow Remote Site Settings and Content Security Policy websites to
                                                    send or receive data without confirmation
 
+  -t, --travisretry                                if the command fail it going to retry 3 times again
+
   -u, --targetusername=targetusername              username or alias for the target org; overrides default target org
 
   -v, --targetdevhubusername=targetdevhubusername  username or alias for the dev hub org; overrides default dev hub org
