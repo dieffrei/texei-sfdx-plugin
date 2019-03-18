@@ -139,11 +139,7 @@ export default class Install extends SfdxCommand {
         // Split arguments to use spawn
         const args = [];
 
-        if (this.flags.travisretry) {
-          args.push('travis_retry force:package:install');
-        } else {
-          args.push('force:package:install');
-        }
+        args.push('force:package:install');
 
         // USERNAME
         args.push('--targetusername');
@@ -174,7 +170,12 @@ export default class Install extends SfdxCommand {
         // INSTALL PACKAGE
         // TODO: How to add a debug flag or write to sfdx.log with --loglevel ?
         this.ux.log(`Installing package ${packageInfo.packageVersionId} : ${packageInfo.dependentPackage}${ packageInfo.versionNumber === undefined ? '' : ' ' + packageInfo.versionNumber }`);
-        await spawn('sfdx', args, { stdio: 'inherit' });
+
+        if (this.flags.travisretry) {
+          await spawn('sfdx', args, {stdio: 'inherit'});
+        } else {
+          await spawn('travis_retry sfdx', args, {stdio: 'inherit'});
+        }
 
         this.ux.log('\n');
 
