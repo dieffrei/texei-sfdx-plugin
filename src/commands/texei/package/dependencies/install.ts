@@ -137,6 +137,7 @@ export default class Install extends SfdxCommand {
 
         // Split arguments to use spawn
         const args = [];
+
         args.push('force:package:install');
 
         // USERNAME
@@ -168,7 +169,8 @@ export default class Install extends SfdxCommand {
         // INSTALL PACKAGE
         // TODO: How to add a debug flag or write to sfdx.log with --loglevel ?
         this.ux.log(`Installing package ${packageInfo.packageVersionId} : ${packageInfo.dependentPackage}${ packageInfo.versionNumber === undefined ? '' : ' ' + packageInfo.versionNumber }`);
-        await spawn('sfdx', args, { stdio: 'inherit' });
+
+        await this.executeDXCommand(3, args);
 
         this.ux.log('\n');
 
@@ -179,6 +181,18 @@ export default class Install extends SfdxCommand {
     }
 
     return { message: result };
+  }
+
+  private async executeDXCommand(attemptsUntilFail: number, args: string[]) {
+    if (attemptsUntilFail > 0) {
+      try {
+        await spawn('sfdx', args, {stdio: 'inherit'});
+      } catch (ex) {
+        const currentAttempt: number = (3 - attemptsUntilFail) + 1;
+        this.ux.log(`Retrying ${currentAttempt} of 3:`);
+        await this.executeDXCommand(attemptsUntilFail - 1, args);
+      }
+    }
   }
 
   private async getPackageVersionId(name: string, version: string, namespaces: string[]) {
