@@ -29,8 +29,7 @@ export default class Install extends SfdxCommand {
     branch: { char: 'b', required: false, description: 'the package version’s branch' },
     namespaces: { char: 'n', required: false, description: 'filter package installation by namespace' },
     wait: { char: 'w', type: 'number', required: false, description: 'number of minutes to wait for installation status (also used for publishwait). Default is 10' },
-    noprompt: { char: 'r', required: false, type: 'boolean', description: 'allow Remote Site Settings and Content Security Policy websites to send or receive data without confirmation' },
-    travisretry: { char: 't', required: false, type: 'boolean', description: 'if the command fail it going to retry 3 times again'}
+    noprompt: { char: 'r', required: false, type: 'boolean', description: 'allow Remote Site Settings and Content Security Policy websites to send or receive data without confirmation' }
   };
 
   // Comment this out if your command does not require an org username
@@ -171,11 +170,7 @@ export default class Install extends SfdxCommand {
         // TODO: How to add a debug flag or write to sfdx.log with --loglevel ?
         this.ux.log(`Installing package ${packageInfo.packageVersionId} : ${packageInfo.dependentPackage}${ packageInfo.versionNumber === undefined ? '' : ' ' + packageInfo.versionNumber }`);
 
-        if (this.flags.travisretry) {
-          await spawn('sfdx', args, {stdio: 'inherit'});
-        } else {
-          await spawn('travis_retry sfdx', args, {stdio: 'inherit'});
-        }
+        await this.executeDXCommand(3, args);
 
         this.ux.log('\n');
 
@@ -186,6 +181,18 @@ export default class Install extends SfdxCommand {
     }
 
     return { message: result };
+  }
+
+  private async executeDXCommand(attemptsUntilFail: number, args: string[]) {
+    if (attemptsUntilFail > 0) {
+      try {
+        await spawn('sfdx', args, {stdio: 'inherit'});
+      } catch (ex) {
+        const currentAttempt: number = (3 - attemptsUntilFail) + 1;
+        this.ux.log(`Retrying ${currentAttempt} of 3:`);
+        await this.executeDXCommand(attemptsUntilFail - 1, args);
+      }
+    }
   }
 
   private async getPackageVersionId(name: string, version: string, namespaces: string[]) {
