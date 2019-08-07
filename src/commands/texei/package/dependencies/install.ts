@@ -210,7 +210,7 @@ export default class Install extends SfdxCommand {
     if (packageName.startsWith(packageVersionIdPrefix)) {
       // Package2VersionId is set directly
       packageId = packageName;
-    } else if (packageName.startsWith(packageIdPrefix)) {
+    } /*else if (packageName.startsWith(packageIdPrefix)) {
       // Get Package version id from package + versionNumber
       const vers = version.split('.');
       let query = 'Select SubscriberPackageVersionId, IsPasswordProtected, IsReleased, Package2.NamespacePrefix ';
@@ -240,7 +240,9 @@ export default class Install extends SfdxCommand {
       if (resultPackageId.size > 0) {
         packageId = resultPackageId.records[0].SubscriberPackageVersionId;
       }
-    }
+    }*/
+
+    this.ux.log(`getPackageVersionId packageId: ${packageId}`);
 
     return packageId;
   }
